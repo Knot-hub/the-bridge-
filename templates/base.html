@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}The Bridge{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#00D37F',
+                        brandhover: '#00B26A',
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Sidebar Collapse Styles */
+        .sidebar-collapsed {
+            width: 5rem !important;
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+        .sidebar-collapsed .sidebar-label,
+        .sidebar-collapsed .nav-label,
+        .sidebar-collapsed .user-details {
+            display: none !important;
+        }
+        .sidebar-collapsed .sidebar-header {
+            justify-content: center !important;
+            margin-bottom: 2rem !important;
+        }
+        .sidebar-collapsed nav {
+            align-items: center !important;
+        }
+        .sidebar-collapsed nav a {
+            justify-content: center !important;
+            width: 3.5rem !important;
+            height: 3.5rem !important;
+            padding: 0 !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+        .sidebar-collapsed .user-info {
+            justify-content: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+    </style>
+</head>
+<body class="{% block body_class %}bg-white text-gray-900 dark:bg-[#0F0F0F] dark:text-gray-100{% endblock %} transition-colors duration-300">
+    {% block content %}{% endblock %}
+
+    <script>
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar) return;
+            
+            sidebar.classList.toggle('sidebar-collapsed');
+            const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+            localStorage.setItem('sidebar-collapsed', isCollapsed);
+            
+            const toggleIcon = document.getElementById('toggleIcon');
+            if (toggleIcon) {
+                if (isCollapsed) {
+                    toggleIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />';
+                } else {
+                    toggleIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7M19 19l-7-7 7-7" />';
+                }
+            }
+        }
+
+        // Handle responsive sidebar behavior
+        function handleResize() {
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar) return;
+
+            // Automatically collapse on small screens (< 1024px)
+            if (window.innerWidth < 1024) {
+                if (!sidebar.classList.contains('sidebar-collapsed')) {
+                    sidebar.classList.add('sidebar-collapsed');
+                    updateSidebarIcon(true);
+                }
+            } else {
+                // Restore preference on larger screens
+                const wasCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+                if (wasCollapsed) {
+                    sidebar.classList.add('sidebar-collapsed');
+                    updateSidebarIcon(true);
+                } else {
+                    sidebar.classList.remove('sidebar-collapsed');
+                    updateSidebarIcon(false);
+                }
+            }
+        }
+
+        function updateSidebarIcon(isCollapsed) {
+            const toggleIcon = document.getElementById('toggleIcon');
+            if (toggleIcon) {
+                if (isCollapsed) {
+                    toggleIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />';
+                } else {
+                    toggleIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7M19 19l-7-7 7-7" />';
+                }
+            }
+        }
+
+        // Apply sidebar state on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                handleResize(); // Initial check
+                window.addEventListener('resize', handleResize);
+            }
+        });
+    </script>
+</body>
+</html>
